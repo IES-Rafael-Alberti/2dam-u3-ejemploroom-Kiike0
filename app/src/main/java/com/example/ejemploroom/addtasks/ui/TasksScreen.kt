@@ -149,7 +149,7 @@ fun TasksList(tasks: List<TaskModel>, tasksViewModel: TasksViewModel) {
         items(tasks, key = { it.id }) { task ->
             ItemTask(
                 task,
-                onTaskRemove = { tasksViewModel.onItemRemove(it) },
+                onTaskRemove = { tasksViewModel.onDeleteTask(it) },
                 onTaskCheckChanged = { tasksViewModel.onCheckBoxSelected(it) }
             )
         }

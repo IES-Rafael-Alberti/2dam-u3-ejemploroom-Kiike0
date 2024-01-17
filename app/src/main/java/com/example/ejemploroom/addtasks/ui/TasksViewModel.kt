@@ -6,8 +6,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ejemploroom.addtasks.data.TaskRepository
 import com.example.ejemploroom.addtasks.domain.AddTaskUseCase
+import com.example.ejemploroom.addtasks.domain.DeleteTaskUseCase
 import com.example.ejemploroom.addtasks.domain.GetTasksUseCase
+import com.example.ejemploroom.addtasks.domain.UpdateTaskUseCase
 import com.example.ejemploroom.addtasks.ui.model.TaskModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -24,6 +27,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class TasksViewModel @Inject constructor(
     private val addTaskUseCase: AddTaskUseCase,
+    private val deleteTaskUseCase: DeleteTaskUseCase,
+    private val updateTaskUseCase: UpdateTaskUseCase,
     getTasksUseCase: GetTasksUseCase
 ): ViewModel() {
 
@@ -46,14 +51,8 @@ class TasksViewModel @Inject constructor(
     private val _myTaskText = MutableLiveData<String>()
     val myTaskText: LiveData<String> = _myTaskText
 
-    //Los LiveData no van bien con los listados que se tienen que ir actualizando...
-    //Para solucionarlo, podemos utilizar un mutableStateListOf porque se lleva mejor con
-    // LazyColumn a la hora de refrescar la información en la vista...
-    //TODO: Código a eliminar.
-    //Utilizamos mutableStateListOf porque se lleva mejor con LazyColumn a la hora
-    //de refrescar la información en la vista...
-    //private val _tasks = mutableStateListOf<TaskModel>()
-    //val tasks: List<TaskModel> = _tasks
+    private val _tasks = MutableLiveData<List<TaskModel>>()
+    val tasks: LiveData<List<TaskModel>> get() = _tasks
 
     fun onDialogClose() {
         _showDialog.value = false
@@ -80,31 +79,29 @@ class TasksViewModel @Inject constructor(
         _myTaskText.value = taskText
     }
 
-    fun onItemRemove(taskModel: TaskModel) {
-        //No podemos usar directamente _tasks.remove(taskModel) porque no es posible por el uso de let con copy para modificar el checkbox...
-        //Para hacerlo correctamente, debemos previamente buscar la tarea en la lista por el id y después eliminarla
-        //TODO: Código a eliminar. Falta desarrollar borrar tarea con un caso de uso y lanzarlo como corutina.
-        //val task = _tasks.find { it.id == taskModel.id }
-        //_tasks.remove(task)
+    fun onDeleteTask(taskModel: TaskModel) {
+        viewModelScope.launch {
+            deleteTaskUseCase(taskModel)
+        }
     }
 
+    fun onUpdateTask(taskModel: TaskModel) {
+        viewModelScope.launch {
+            updateTaskUseCase(taskModel)
+        }
+    }
+
+
+    /*
+    fun onItemRemove(taskModel: TaskModel) {
+
+    }*/
+
     fun onCheckBoxSelected(taskModel: TaskModel) {
-
-        //Si se modifica directamente _tasks[index].selected = true no se recompone el item en el LazyColumn
-        //Esto nos ha pasado ya en el proyecto BlackJack... ¿¿os acordáis?? :-(
-        //Y es que la vista no se entera que debe recomponerse, aunque realmente si se ha modificado el valor en el item
-        //Para solucionarlo y que se recomponga sin problemas en la vista, lo hacemos con un let...
-
-        //El método let toma como parámetro el objeto y devuelve el resultado de la expresión lambda
-        //En nuestro caso, el objeto que recibe let es de tipo TaskModel, que está en _tasks[index]
-        //(sería el it de la exprexión lambda)
-        //El método copy realiza una copia del objeto, pero modificando la propiedad selected a lo contrario
-        //El truco está en que no se modifica solo la propiedad selected de tasks[index],
-        //sino que se vuelve a reasignar para que la vista vea que se ha actualizado un item y se recomponga.
-
-        //TODO: Código a eliminar. Falta desarrollar actualizar tarea con un caso de uso y lanzarlo como corutina.
-        //val index = _tasks.indexOf(taskModel)
-        //_tasks[index] = _tasks[index].let { it.copy(selected = !it.selected) } }
+        viewModelScope.launch {
+            // Llama al caso de uso para actualizar la tarea en la base de datos
+            updateTaskUseCase(taskModel.copy(selected = !taskModel.selected))
+        }
     }
 
 }
