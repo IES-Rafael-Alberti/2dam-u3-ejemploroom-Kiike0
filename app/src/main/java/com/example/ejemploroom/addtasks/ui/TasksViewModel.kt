@@ -1,12 +1,9 @@
 package com.example.ejemploroom.addtasks.ui
 
-import android.util.Log
-import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ejemploroom.addtasks.data.TaskRepository
 import com.example.ejemploroom.addtasks.domain.AddTaskUseCase
 import com.example.ejemploroom.addtasks.domain.DeleteTaskUseCase
 import com.example.ejemploroom.addtasks.domain.GetTasksUseCase
@@ -51,8 +48,8 @@ class TasksViewModel @Inject constructor(
     private val _myTaskText = MutableLiveData<String>()
     val myTaskText: LiveData<String> = _myTaskText
 
-    private val _tasks = MutableLiveData<List<TaskModel>>()
-    val tasks: LiveData<List<TaskModel>> get() = _tasks
+    //private val _tasks = MutableLiveData<List<TaskModel>>()
+    //val tasks: LiveData<List<TaskModel>> get() = _tasks
 
     fun onDialogClose() {
         _showDialog.value = false
@@ -85,12 +82,13 @@ class TasksViewModel @Inject constructor(
         }
     }
 
+    /*
     fun onUpdateTask(taskModel: TaskModel) {
         viewModelScope.launch {
             updateTaskUseCase(taskModel)
         }
     }
-
+    */
 
     /*
     fun onItemRemove(taskModel: TaskModel) {
